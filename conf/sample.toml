@@ -12,6 +12,7 @@ mode="dev"
 enableTestRoute=true 
 enableMediaRoute=true
 enableStaticRoute=true
+maxRequestDataSize=1048576 # bytes
 
 [token]
 jwtSignKey="cn2eiudh"

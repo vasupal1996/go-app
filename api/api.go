@@ -4,6 +4,7 @@ import (
 	"go-app/server/auth"
 	"go-app/server/config"
 	"go-app/server/handler"
+	"go-app/server/validator"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -17,6 +18,7 @@ type API struct {
 	Logger     *zerolog.Logger
 	Config     *config.APIConfig
 	TokenAuth  auth.TokenAuth
+	Validator  *validator.Validator
 }
 
 // Router stores all the endpoints available for the server to respond.
@@ -29,12 +31,14 @@ type Router struct {
 // NewAPI returns API instance
 func NewAPI(m *mux.Router, c *config.APIConfig, tc *config.TokenAuthConfig, l *zerolog.Logger) *API {
 	ta := auth.NewTokenAuthentication(tc)
+	v := validator.NewValidation()
 	api := API{
 		MainRouter: m,
 		Router:     &Router{},
 		Config:     c,
 		TokenAuth:  ta,
 		Logger:     l,
+		Validator:  v,
 	}
 	api.setupRoutes()
 	return &api

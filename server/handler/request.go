@@ -3,9 +3,9 @@ package handler
 import (
 	"encoding/json"
 	"go-app/server/auth"
+	"go-app/server/middleware"
 	"net/http"
 
-	uuid "github.com/satori/go.uuid"
 	errors "github.com/vasupal1996/goerror"
 )
 
@@ -20,14 +20,14 @@ type Request struct {
 // HandleRequest := handles incoming requests from client
 func (rh *Request) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestCTX := &RequestContext{}
-	requestCTX.RequestID = uuid.NewV4().String() + "-" + uuid.NewV4().String()
+	requestCTX.RequestID = middleware.RequestIDFromContext(r.Context())
 	requestCTX.Path = r.URL.Path
 
 	authToken := r.Header.Get("Authorization")
 	if authToken != "" {
 		err := rh.AuthFunc.VerifyToken(authToken)
 		if err != nil {
-			requestCTX.SetErr(errors.New("failed to verify token", &errors.PermissionDenied))
+			requestCTX.SetErr(errors.New("failed to verify token", &errors.PermissionDenied), http.StatusUnauthorized)
 			goto SKIP_REQUEST
 		} else {
 			requestCTX.UserClaim = rh.AuthFunc.GetClaim().(*auth.UserClaim)
@@ -36,12 +36,12 @@ func (rh *Request) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if rh.IsLoggedIn {
 		if requestCTX.UserClaim == nil {
-			requestCTX.SetErr(errors.New("auth token required", &errors.PermissionDenied))
+			requestCTX.SetErr(errors.New("auth token required", &errors.PermissionDenied), http.StatusUnauthorized)
 			goto SKIP_REQUEST
 		} else {
 			if rh.IsSudoUser {
 				if requestCTX.UserClaim.IsAdmin() {
-					requestCTX.SetErr(errors.New("permission denied: required admin user role", &errors.PermissionDenied))
+					requestCTX.SetErr(errors.New("permission denied: required admin user role", &errors.PermissionDenied), http.StatusForbidden)
 					goto SKIP_REQUEST
 				}
 			}
@@ -50,8 +50,8 @@ func (rh *Request) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 SKIP_REQUEST:
 
+	w.Header().Set(auth.HeaderRequestID, requestCTX.RequestID)
 	if requestCTX.Err == nil {
-		w.Header().Set(auth.HeaderRequestID, requestCTX.RequestID)
 		rh.HandlerFunc(requestCTX, w, r)
 	}
 
@@ -62,7 +62,8 @@ SKIP_REQUEST:
 	switch t := requestCTX.ResponseType; t {
 	case HTMLResp:
 		w.Header().Set("Content-Type", "text/html")
-		w.Write(requestCTX.Response.Payload.([]byte))
+		res := requestCTX.Response.GetRaw()
+		w.Write(res.([]byte))
 	case JSONResp:
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(requestCTX.Response)
@@ -71,6 +72,8 @@ SKIP_REQUEST:
 		requestCTX.Err.RequestID = &requestCTX.RequestID
 		json.NewEncoder(w).Encode(&requestCTX.Err)
 	case RedirectResp:
-		http.Redirect(w, r, requestCTX.Response.Payload.(string), requestCTX.ResponseCode)
+		res, _ := requestCTX.Response.MarshalJSON()
+		http.Redirect(w, r, string(res), requestCTX.ResponseCode)
 	}
+
 }

@@ -1,12 +1,14 @@
 package handler
 
-import "go-app/server/auth"
+import (
+	"go-app/server/auth"
+)
 
 // RequestContext persists the request journey from request hitting the server to sending response
 type RequestContext struct {
 	RequestID    string
 	Path         string
-	Response     *AppResponse
+	Response     Response
 	Err          *AppErr
 	ResponseType ResponseType
 	ResponseCode int
@@ -14,9 +16,10 @@ type RequestContext struct {
 }
 
 // SetErr := setting Err response in request context
-func (requestCTX *RequestContext) SetErr(err error) {
+func (requestCTX *RequestContext) SetErr(err error, statusCode int) {
 	appErr := requestCTX.Err
 	requestCTX.ResponseType = ErrorResp
+	requestCTX.ResponseCode = statusCode
 	if appErr == nil {
 		appErr = &AppErr{}
 	}
@@ -33,10 +36,21 @@ func (requestCTX *RequestContext) SetAppResponse(message interface{}, statusCode
 	}
 }
 
+// SetCustomResponse := setting app response in request context
+func (requestCTX *RequestContext) SetCustomResponse(success bool, message interface{}, err interface{}, statusCode int) {
+	requestCTX.ResponseType = JSONResp
+	requestCTX.ResponseCode = statusCode
+	requestCTX.Response = &CustomResponse{
+		Success: success,
+		Payload: message,
+		Error:   err,
+	}
+}
+
 // SetErrs adds slice of errors in requestCTX
-func (requestCTX *RequestContext) SetErrs(errs []error) {
+func (requestCTX *RequestContext) SetErrs(errs []error, statusCode int) {
 	for _, e := range errs {
-		requestCTX.SetErr(e)
+		requestCTX.SetErr(e, statusCode)
 	}
 }
 

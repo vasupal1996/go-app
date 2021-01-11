@@ -38,10 +38,11 @@ type ServerConfig struct {
 
 // APIConfig contains api package related configurations
 type APIConfig struct {
-	Mode              string `mapstructure:"mode"`
-	EnableTestRoute   bool   `mapstructure:"enableTestRoute"`
-	EnableMediaRoute  bool   `mapstructure:"enableMediaRoute"`
-	EnableStaticRoute bool   `mapstructure:"enableStaticRoute"`
+	Mode               string `mapstructure:"mode"`
+	EnableTestRoute    bool   `mapstructure:"enableTestRoute"`
+	EnableMediaRoute   bool   `mapstructure:"enableMediaRoute"`
+	EnableStaticRoute  bool   `mapstructure:"enableStaticRoute"`
+	MaxRequestDataSize int    `mapstructure:"maxRequestDataSize"`
 }
 
 // TokenAuthConfig contains token authentication related configuration
