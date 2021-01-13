@@ -12,7 +12,7 @@ mode="dev"
 enableTestRoute=true 
 enableMediaRoute=true
 enableStaticRoute=true
-maxRequestDataSize=1048576 # bytes
+maxRequestDataSize=1048576
 
 [token]
 jwtSignKey="cn2eiudh"
@@ -23,10 +23,21 @@ brokerUrl="localhost"
 brokerPort="29092"
 
 [logger]
-enableKafkaLog=false
-enableConsoleLog=true
-kafkaTopic="log"
-kafkaParition=1
+
+    [logger.fileLog]
+    enableFileLog=true
+
+    [logger.kafkaLog]
+    enableKafkaLog=false
+    kafkaTopic="log"
+    kafkaParition=1
+
+    [logger.consoleLog]
+    enableConsoleLog=true
+    maxBackupFile=1
+    maxFileSize=1 #megabytes
+    maxAge=1 #days
+    compress=true #disabled by default
 
 [database]
 scheme="mongodb"
