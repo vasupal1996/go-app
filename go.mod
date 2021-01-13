@@ -17,4 +17,5 @@ require (
 	github.com/urfave/negroni v1.0.0
 	github.com/vasupal1996/goerror v0.0.0-20201208172918-4461ab1738f7
 	go.mongodb.org/mongo-driver v1.4.4
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )

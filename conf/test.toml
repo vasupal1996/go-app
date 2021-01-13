@@ -1,0 +1,57 @@
+[server]
+listenAddr="localhost"
+port="8000"
+readTimeout=5
+writeTimeout=5
+closeTimeout=5
+env="dev"
+useMemoryStore=true
+
+[api]
+mode="dev"
+enableTestRoute=true 
+enableMediaRoute=true
+enableStaticRoute=true
+maxRequestDataSize=1048576
+
+[token]
+jwtSignKey="cn2eiudh"
+
+[kafka]
+brokerDial="tcp"
+brokerUrl="localhost"
+brokerPort="29092"
+
+[logger]
+
+    [logger.fileLog]
+    enableFileLog=false
+
+    [logger.kafkaLog]
+    enableKafkaLog=false
+    kafkaTopic="log"
+    kafkaParition=1
+
+    [logger.consoleLog]
+    enableConsoleLog=true
+    maxBackupFile=1
+    maxFileSize=1 #megabytes
+    maxAge=1 #days
+    compress=true #disabled by default
+
+[database]
+scheme="mongodb"
+username=""
+password=""
+host="localhost:27017"
+replicaSet=""
+
+[redis]
+network="tcp"
+host="localhost"
+port="6379"
+password=""
+username=""
+
+[middleware]
+enableRequestLog=true

@@ -19,6 +19,10 @@ type Config struct {
 	RedisConfig      RedisConfig      `mapstructure:"redis"`
 	MiddlewareConfig MiddlewareConfig `mapstructure:"middleware"`
 
+	// KafkaLoggerConfig   KafkaLoggerConfig   `mapstructure:"kafkaLog"`
+	// FileLoggerConfig    FileLoggerConfig    `mapstructure:"fileLog"`
+	// ConsoleLoggerConfig ConsoleLoggerConfig `mapstructure:"consoleLog"`
+
 	// CacheConfig    CacheConfig    `mapstructure:"cache"`
 
 	// ZipkinConfig   ZipkinConfig   `mapstructure:"zipkin"`
@@ -57,12 +61,32 @@ type KafkaConfig struct {
 	BrokerPort string `mapstructure:"brokerPort"`
 }
 
-// LoggerConfig contains logger specific configuration
+// LoggerConfig contains different logger configurations
 type LoggerConfig struct {
-	EnableKafkaLog   bool   `mapstructure:"enableKafkaLog"`
-	EnableConsoleLog bool   `mapstructure:"enableConsoleLog"`
-	KafkaTopic       string `mapstructure:"kafkaTopic"`
-	KafkaPartition   string `mapstructure:"kafkaPartition"`
+	KafkaLoggerConfig   `mapstructure:"kafkaLog"`
+	FileLoggerConfig    `mapstructure:"fileLog"`
+	ConsoleLoggerConfig `mapstructure:"consoleLog"`
+}
+
+// KafkaLoggerConfig contains kafka logger specific configuration
+type KafkaLoggerConfig struct {
+	EnableKafkaLogger bool   `mapstructure:"enableKafkaLog"`
+	KafkaTopic        string `mapstructure:"kafkaTopic"`
+	KafkaPartition    string `mapstructure:"kafkaPartition"`
+}
+
+// ConsoleLoggerConfig contains file console logging specific configuration
+type ConsoleLoggerConfig struct {
+	EnableConsoleLogger bool `mapstructure:"enableConsoleLog"`
+}
+
+// FileLoggerConfig contains file logging specific configuration
+type FileLoggerConfig struct {
+	EnableFileLogger bool `mapstructure:"enableFileLog"`
+	MaxBackupsFile   int  `mapstructure:"maxBackupFile"`
+	MaxSize          int  `mapstructure:"maxFileSize"`
+	MaxAge           int  `mapstructure:"maxAge"`
+	Compress         bool `mapstructure:"compress"`
 }
 
 // DatabaseConfig contains mongodb related configuration
@@ -120,17 +144,20 @@ type MiddlewareConfig struct {
 
 // GetConfig returns entire project configuration
 func GetConfig() *Config {
-	return getConfigFromFile("default")
+	return GetConfigFromFile("default")
 }
 
-func getConfigFromFile(fileName string) *Config {
+// GetConfigFromFile returns configuration from specific file object
+func GetConfigFromFile(fileName string) *Config {
 	if fileName == "" {
 		fileName = "default"
 	}
 
 	// looking for filename `default` inside `src/server` dir with `.toml` extension
 	viper.SetConfigName(fileName)
-	viper.AddConfigPath("./conf/")
+	// viper.AddConfigPath("./conf/")
+	viper.AddConfigPath("../conf/")
+	viper.AddConfigPath("../../conf/")
 	viper.SetConfigType("toml")
 
 	err := viper.ReadInConfig()
