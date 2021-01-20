@@ -51,7 +51,8 @@ type APIConfig struct {
 
 // TokenAuthConfig contains token authentication related configuration
 type TokenAuthConfig struct {
-	JWTSignKey string `mapstructure:"jwtSignKey"`
+	JWTSignKey   string `mapstructure:"jwtSignKey"`
+	JWTExpiresAt int64  `mapstructure:"expiresAt"`
 }
 
 // KafkaConfig has kafka cluster specific configuration
@@ -155,9 +156,10 @@ func GetConfigFromFile(fileName string) *Config {
 
 	// looking for filename `default` inside `src/server` dir with `.toml` extension
 	viper.SetConfigName(fileName)
-	// viper.AddConfigPath("./conf/")
 	viper.AddConfigPath("../conf/")
 	viper.AddConfigPath("../../conf/")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("./conf/")
 	viper.SetConfigType("toml")
 
 	err := viper.ReadInConfig()

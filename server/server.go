@@ -46,7 +46,6 @@ type Server struct {
 // NewServer returns a new Server object
 func NewServer() *Server {
 	c := config.GetConfig()
-	fmt.Printf("%+v\n", c.LoggerConfig.ConsoleLoggerConfig)
 	k := goKafka.NewKafka(&c.KafkaConfig)
 	l := logger.NewLogger(&c.LoggerConfig, logger.NewKafkaLogWriter(c.LoggerConfig.KafkaLoggerConfig.KafkaTopic, k.Conn), logger.NewZeroLogConsoleLogger(logger.NewStandardConsoleWriter()), nil)
 	ms := mongostorage.NewMongoStorage(&c.DatabaseConfig)

@@ -15,7 +15,8 @@ enableStaticRoute=true
 maxRequestDataSize=1048576
 
 [token]
-jwtSignKey="cn2eiudh"
+jwtSignKey="abc123"
+expiresAt=150
 
 [kafka]
 brokerDial="tcp"
