@@ -1,6 +1,11 @@
 package storage
 
-// Impl used by server to implement any storage interface such as mongodb, sql, redis etc.
-type Impl interface {
+// DB used by server to implement any storage interface by redis client.
+type DB interface {
+	Close()
+}
+
+// Redis used by server to implement any storage interface by redis client.
+type Redis interface {
 	Close()
 }

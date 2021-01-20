@@ -37,8 +37,8 @@ type Server struct {
 	Log        *zerolog.Logger
 	Config     *config.Config
 	Kafka      goKafka.Kafka
-	MongoDB    storage.Impl
-	Redis      storage.Impl
+	MongoDB    storage.DB
+	Redis      storage.Redis
 
 	API *api.API
 }
