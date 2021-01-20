@@ -4,9 +4,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"go-app/server/config"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // TokenAuthentication contains authentication related attributes and methods
@@ -22,14 +22,14 @@ func NewTokenAuthentication(c *config.TokenAuthConfig) *TokenAuthentication {
 
 // UserAuth contains encoded token info and user info
 type UserAuth struct {
-	Claim UserClaim
-	Token JWTToken
+	UserClaim *UserClaim
+	JWTToken  JWTToken
 }
 
 // UserClaim contains user related info for jwt token
 type UserClaim struct {
-	ID   primitive.ObjectID `json:"_id"`
-	Type string             `json:"type"`
+	ID   string `json:"id"`
+	Type string `json:"type"`
 	jwt.StandardClaims
 }
 
@@ -54,7 +54,12 @@ func (uc *UserClaim) IsAdmin() bool {
 }
 
 // SignToken sign and encodes jwt.Token as a string
-func (t *TokenAuthentication) SignToken(token *jwt.Token) (string, error) {
+func (t *TokenAuthentication) SignToken() (string, error) {
+	if t.Config.JWTExpiresAt != 0 {
+		expirationTime := time.Now().Add(time.Duration(t.Config.JWTExpiresAt) * time.Minute)
+		t.User.UserClaim.StandardClaims.ExpiresAt = expirationTime.Unix()
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, t.User.UserClaim)
 	tokenString, _ := token.SignedString([]byte(t.Config.JWTSignKey))
 	return base64.StdEncoding.EncodeToString([]byte(tokenString)), nil
 }
@@ -78,11 +83,21 @@ func (t *TokenAuthentication) VerifyToken(tokenString string) error {
 		return err
 	}
 
-	t.User.Claim = uc
+	t.SetClaim(&uc)
 	return nil
 }
 
 // GetClaim returns token claim
-func (t *TokenAuthentication) GetClaim() interface{} {
-	return t.User.Claim
+func (t *TokenAuthentication) GetClaim() Claim {
+	return t.User.UserClaim
+}
+
+// SetClaim sets token claim
+func (t *TokenAuthentication) SetClaim(uc Claim) {
+	if uc == nil {
+		return
+	}
+	t.User = &UserAuth{
+		UserClaim: uc.(interface{}).(*UserClaim),
+	}
 }

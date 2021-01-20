@@ -1,3 +1,5 @@
+//go:generate mockgen -destination=../mocks/tokenAuth_mock.go
+
 package auth
 
 import (
@@ -11,9 +13,10 @@ const HeaderRequestID = "X-Request-ID"
 
 // TokenAuth defines method for implementing token authentication
 type TokenAuth interface {
-	SignToken(*jwt.Token) (string, error)
+	SignToken() (string, error)
 	VerifyToken(string) error
-	GetClaim() interface{}
+	GetClaim() Claim
+	SetClaim(Claim)
 }
 
 // Claim defines custom token claim type methods.
