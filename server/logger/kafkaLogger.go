@@ -5,6 +5,8 @@ import (
 	"io"
 	"log"
 
+	gokafka "go-app/server/kafka"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
 	"github.com/segmentio/kafka-go"
@@ -16,9 +18,9 @@ type KafkaLogWriter struct {
 }
 
 // NewKafkaLogWriter returns new instance of KafkaLogWriter
-func NewKafkaLogWriter(topic string, conn *kafka.Conn) *KafkaLogWriter {
+func NewKafkaLogWriter(topic string, k *gokafka.SegmentioKafkaImpl) *KafkaLogWriter {
 	kw := &kafka.Writer{
-		Addr:     conn.RemoteAddr(),
+		Addr:     k.Conn.RemoteAddr(),
 		Topic:    topic,
 		Async:    true,
 		Balancer: &kafka.LeastBytes{},

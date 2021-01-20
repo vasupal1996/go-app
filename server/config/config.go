@@ -57,9 +57,10 @@ type TokenAuthConfig struct {
 
 // KafkaConfig has kafka cluster specific configuration
 type KafkaConfig struct {
-	BrokerDial string `mapstructure:"brokerDial"`
-	BrokerURL  string `mapstructure:"brokerUrl"`
-	BrokerPort string `mapstructure:"brokerPort"`
+	BrokerDial string   `mapstructure:"brokerDial"`
+	BrokerURL  string   `mapstructure:"brokerUrl"`
+	BrokerPort string   `mapstructure:"brokerPort"`
+	Brokers    []string `mapstructure:"brokers"`
 }
 
 // LoggerConfig contains different logger configurations

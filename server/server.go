@@ -36,7 +36,7 @@ type Server struct {
 	Router     *mux.Router
 	Log        *zerolog.Logger
 	Config     *config.Config
-	Kafka      goKafka.KImpl
+	Kafka      goKafka.Kafka
 	MongoDB    storage.Impl
 	Redis      storage.Impl
 
@@ -46,12 +46,12 @@ type Server struct {
 // NewServer returns a new Server object
 func NewServer() *Server {
 	c := config.GetConfig()
-	k := goKafka.NewKafka(&c.KafkaConfig)
-	l := logger.NewLogger(&c.LoggerConfig, logger.NewKafkaLogWriter(c.LoggerConfig.KafkaLoggerConfig.KafkaTopic, k.Conn), logger.NewZeroLogConsoleLogger(logger.NewStandardConsoleWriter()), nil)
+	k := goKafka.NewSegmentioKafka(&c.KafkaConfig)
+	l := logger.NewLogger(&c.LoggerConfig, logger.NewKafkaLogWriter(c.LoggerConfig.KafkaLoggerConfig.KafkaTopic, k), logger.NewZeroLogConsoleLogger(logger.NewStandardConsoleWriter()), nil)
 	ms := mongostorage.NewMongoStorage(&c.DatabaseConfig)
 	r := mux.NewRouter()
 
-	api := api.NewAPI(r, &c.APIConfig, &c.TokenAuthConfig, l)
+	api := api.NewAPI(r, &c.APIConfig, &c.TokenAuthConfig, nil)
 
 	server := &Server{
 		httpServer: &http.Server{},
