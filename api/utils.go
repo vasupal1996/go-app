@@ -22,9 +22,13 @@ func (a *API) DecodeJSONBody(r *http.Request, dst interface{}) error {
 		}
 	}
 
-	// r.Body = http.MaxBytesReader(w, r.Body, 1048576)
+	if r.ContentLength == 0 {
+		return errors.New("Request body must not be empty", &errors.BadRequest)
+	}
 
+	// r.Body = http.MaxBytesReader(w, r.Body, 1048576)
 	dec := json.NewDecoder(r.Body)
+
 	dec.DisallowUnknownFields()
 
 	err := dec.Decode(&dst)

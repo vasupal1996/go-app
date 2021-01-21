@@ -13,6 +13,7 @@ import (
 	"context"
 	"fmt"
 	"go-app/api"
+	"go-app/app"
 	"go-app/server/config"
 	goKafka "go-app/server/kafka"
 	"go-app/server/logger"
@@ -21,6 +22,7 @@ import (
 	memorystorage "go-app/server/storage/memory"
 	mongostorage "go-app/server/storage/mongodb"
 	redisstorage "go-app/server/storage/redis"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -46,8 +48,6 @@ type Server struct {
 // NewServer returns a new Server object
 func NewServer() *Server {
 	c := config.GetConfig()
-	k := goKafka.NewSegmentioKafka(&c.KafkaConfig)
-	l := logger.NewLogger(&c.LoggerConfig, logger.NewKafkaLogWriter(c.LoggerConfig.KafkaLoggerConfig.KafkaTopic, k), logger.NewZeroLogConsoleLogger(logger.NewStandardConsoleWriter()), nil)
 	ms := mongostorage.NewMongoStorage(&c.DatabaseConfig)
 	r := mux.NewRouter()
 
@@ -56,18 +56,26 @@ func NewServer() *Server {
 	server := &Server{
 		httpServer: &http.Server{},
 		Config:     c,
-		Kafka:      k,
-		Log:        l,
 		MongoDB:    ms,
 		Router:     r,
 		API:        api,
 	}
 
-	if c.ServerConfig.UserMemoryStore {
+	server.InitLoggers()
+	if c.KafkaConfig.EnableKafka {
+		server.InitKafka()
+	}
+
+	if c.ServerConfig.UseMemoryStore {
 		server.Redis = memorystorage.NewMemoryStorage()
 	} else {
 		server.Redis = redisstorage.NewRedisStorage(&c.RedisConfig)
 	}
+
+	// Initializing app and services
+	server.API.App = app.NewApp(&app.Options{MongoDB: ms, Logger: server.Log, Config: &c.APPConfig})
+	// server.API.App.Example = app.InitExample(&app.ExampleOpts{DBName: "example", MongoStorage: ms, Logger: server.Log})
+
 	return server
 }
 
@@ -88,6 +96,7 @@ func (s *Server) StartServer() {
 		ReadTimeout:  s.Config.ServerConfig.ReadTimeout * time.Second,
 		WriteTimeout: s.Config.ServerConfig.WriteTimeout * time.Second,
 	}
+
 	s.Log.Info().Msgf("Staring server at %s:%s", s.Config.ServerConfig.ListenAddr, s.Config.ServerConfig.Port)
 	go func() {
 		err := s.httpServer.ListenAndServe()
@@ -100,11 +109,45 @@ func (s *Server) StartServer() {
 
 // StopServer closes all the connection and shutdown the server
 func (s *Server) StopServer() {
-	s.Kafka.Close()
-	s.MongoDB.Close()
-	s.Redis.Close()
+	if s.Kafka != nil {
+		s.Kafka.Close()
+	}
+	if s.MongoDB != nil {
+		s.MongoDB.Close()
+	}
+	if s.Redis != nil {
+		s.Redis.Close()
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	s.httpServer.Shutdown(ctx)
 	os.Exit(0)
+}
+
+// InitLoggers initializes all the loggers
+func (s *Server) InitLoggers() {
+	var kl *logger.KafkaLogWriter
+	var cw, fw io.Writer
+	if s.Config.LoggerConfig.EnableKafkaLogger {
+		conn := goKafka.NewSegmentioKafka(&s.Config.KafkaConfig)
+		kl = logger.NewKafkaLogWriter(s.Config.LoggerConfig.KafkaLoggerConfig.KafkaTopic, conn)
+	}
+	if s.Config.LoggerConfig.EnableFileLogger {
+		fw = logger.NewFileWriter(s.Config.LoggerConfig.FileLoggerConfig.FileName, s.Config.LoggerConfig.FileLoggerConfig.Path, &s.Config.LoggerConfig.FileLoggerConfig)
+	}
+	if s.Config.LoggerConfig.EnableConsoleLogger {
+		cw = logger.NewZeroLogConsoleWriter(logger.NewStandardConsoleWriter())
+	}
+	l := logger.NewLogger(kl, cw, fw)
+
+	// Setting logger
+	s.Log = l
+}
+
+// InitKafka initializes sarama kafka
+func (s *Server) InitKafka() {
+	k := goKafka.NewSaramaKafka(&s.Config.KafkaConfig)
+
+	// Setting up kafka
+	s.Kafka = k
 }

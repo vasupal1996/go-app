@@ -2,9 +2,7 @@ package logger
 
 import (
 	"fmt"
-	"go-app/server/config"
 	"io"
-	"os"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -13,15 +11,11 @@ import (
 )
 
 // NewLogger returns logger based on server config
-func NewLogger(c *config.LoggerConfig, kw *KafkaLogWriter, cw, fw io.Writer) *zerolog.Logger {
+func NewLogger(kw *KafkaLogWriter, cw, fw io.Writer) *zerolog.Logger {
 	var writers []io.Writer
 
 	// Setting up kafka writer if True.
-	if c.EnableKafkaLogger {
-		if kw == nil {
-			fmt.Println("failed to create kafka lagger: kafka writer cannot be nil")
-			os.Exit(1)
-		}
+	if kw != nil {
 		wr := diode.NewWriter(kw, 1000, 10*time.Millisecond, func(missed int) {
 			fmt.Printf("Logger Dropped %d messages", missed)
 		})
@@ -29,16 +23,12 @@ func NewLogger(c *config.LoggerConfig, kw *KafkaLogWriter, cw, fw io.Writer) *ze
 	}
 
 	// Setting up console writer if True.
-	if c.EnableConsoleLogger {
-		writers = append(writers, zerolog.ConsoleWriter{Out: cw})
+	if cw != nil {
+		writers = append(writers, cw)
 	}
 
 	// Setting up file writer is True.
-	if c.EnableFileLogger {
-		if kw == nil {
-			fmt.Println("failed to create file lagger: file writer cannot be nil")
-			os.Exit(1)
-		}
+	if kw != nil {
 		wr := diode.NewWriter(fw, 1000, 10*time.Millisecond, func(missed int) {
 			fmt.Printf("Logger Dropped %d messages", missed)
 		})

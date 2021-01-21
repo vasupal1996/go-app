@@ -1,4 +1,4 @@
-//go:generate mockgen -destination=../mocks/tokenAuth_mock.go
+//go:generate $GOPATH/bin/mockgen -destination=../../mock/mock_tokenAuth.go -package=mock go-app/server/auth TokenAuth,Claim
 
 package auth
 

@@ -3,7 +3,6 @@ package logger
 import (
 	"bytes"
 	"fmt"
-	"go-app/server/config"
 	"io"
 	"testing"
 
@@ -11,19 +10,8 @@ import (
 )
 
 func testConsoleLogger(cw io.Writer) *zerolog.Logger {
-	c := config.GetConfigFromFile("test")
-	return NewLogger(&c.LoggerConfig, nil, cw, nil)
-}
-
-func TestGenerateConsole(t *testing.T) {
-	t.Run("empty", func(t *testing.T) {
-		out := &bytes.Buffer{}
-		log := testConsoleLogger(out)
-		log.Log().Msg("")
-		if got, want := string(out.Bytes()), ""; got != want {
-			t.Errorf("invalid log output:\ngot:  %v\nwant: %v", got, want)
-		}
-	})
+	// c := config.GetConfigFromFile("test")
+	return NewLogger(nil, cw, nil)
 }
 
 func TestGenerateMultipleConsoleLog(t *testing.T) {

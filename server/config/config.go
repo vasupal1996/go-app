@@ -13,31 +13,24 @@ import (
 type Config struct {
 	ServerConfig     ServerConfig     `mapstructure:"server"`
 	APIConfig        APIConfig        `mapstructure:"api"`
+	APPConfig        APPConfig        `mapstructure:"app"`
 	KafkaConfig      KafkaConfig      `mapstructure:"kafka"`
 	LoggerConfig     LoggerConfig     `mapstructure:"logger"`
 	DatabaseConfig   DatabaseConfig   `mapstructure:"database"`
 	RedisConfig      RedisConfig      `mapstructure:"redis"`
 	MiddlewareConfig MiddlewareConfig `mapstructure:"middleware"`
-
-	// KafkaLoggerConfig   KafkaLoggerConfig   `mapstructure:"kafkaLog"`
-	// FileLoggerConfig    FileLoggerConfig    `mapstructure:"fileLog"`
-	// ConsoleLoggerConfig ConsoleLoggerConfig `mapstructure:"consoleLog"`
-
-	// CacheConfig    CacheConfig    `mapstructure:"cache"`
-
-	// ZipkinConfig   ZipkinConfig   `mapstructure:"zipkin"`
-	TokenAuthConfig TokenAuthConfig `mapstructure:"token"`
+	TokenAuthConfig  TokenAuthConfig  `mapstructure:"token"`
 }
 
 // ServerConfig has only server specific configuration
 type ServerConfig struct {
-	ListenAddr      string        `mapstructure:"listenAddr"`
-	Port            string        `mapstructure:"port"`
-	ReadTimeout     time.Duration `mapstructure:"readTimeout"`
-	WriteTimeout    time.Duration `mapstructure:"writeTimeout"`
-	CloseTimeout    time.Duration `mapstructure:"closeTimeout"`
-	Env             string        `mapstructure:"env"`
-	UserMemoryStore bool          `mapstructure:"useMemoryStore"`
+	ListenAddr     string        `mapstructure:"listenAddr"`
+	Port           string        `mapstructure:"port"`
+	ReadTimeout    time.Duration `mapstructure:"readTimeout"`
+	WriteTimeout   time.Duration `mapstructure:"writeTimeout"`
+	CloseTimeout   time.Duration `mapstructure:"closeTimeout"`
+	Env            string        `mapstructure:"env"`
+	UseMemoryStore bool          `mapstructure:"useMemoryStore"`
 }
 
 // APIConfig contains api package related configurations
@@ -49,6 +42,17 @@ type APIConfig struct {
 	MaxRequestDataSize int    `mapstructure:"maxRequestDataSize"`
 }
 
+// APPConfig contains api package related configurations
+type APPConfig struct {
+	DatabaseConfig DatabaseConfig
+	ExampleConfig  ServiceConfig `mapstructure:"example"`
+}
+
+// ServiceConfig contains app service related config
+type ServiceConfig struct {
+	DBName string `mapstructure:"dbName"`
+}
+
 // TokenAuthConfig contains token authentication related configuration
 type TokenAuthConfig struct {
 	JWTSignKey   string `mapstructure:"jwtSignKey"`
@@ -57,10 +61,11 @@ type TokenAuthConfig struct {
 
 // KafkaConfig has kafka cluster specific configuration
 type KafkaConfig struct {
-	BrokerDial string   `mapstructure:"brokerDial"`
-	BrokerURL  string   `mapstructure:"brokerUrl"`
-	BrokerPort string   `mapstructure:"brokerPort"`
-	Brokers    []string `mapstructure:"brokers"`
+	EnableKafka bool     `mapstructure:"enableKafka"`
+	BrokerDial  string   `mapstructure:"brokerDial"`
+	BrokerURL   string   `mapstructure:"brokerUrl"`
+	BrokerPort  string   `mapstructure:"brokerPort"`
+	Brokers     []string `mapstructure:"brokers"`
 }
 
 // LoggerConfig contains different logger configurations
@@ -84,11 +89,13 @@ type ConsoleLoggerConfig struct {
 
 // FileLoggerConfig contains file logging specific configuration
 type FileLoggerConfig struct {
-	EnableFileLogger bool `mapstructure:"enableFileLog"`
-	MaxBackupsFile   int  `mapstructure:"maxBackupFile"`
-	MaxSize          int  `mapstructure:"maxFileSize"`
-	MaxAge           int  `mapstructure:"maxAge"`
-	Compress         bool `mapstructure:"compress"`
+	FileName         string `mapstructure:"fileName"`
+	Path             string `mapstructure:"path"`
+	EnableFileLogger bool   `mapstructure:"enableFileLog"`
+	MaxBackupsFile   int    `mapstructure:"maxBackupFile"`
+	MaxSize          int    `mapstructure:"maxFileSize"`
+	MaxAge           int    `mapstructure:"maxAge"`
+	Compress         bool   `mapstructure:"compress"`
 }
 
 // DatabaseConfig contains mongodb related configuration

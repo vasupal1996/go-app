@@ -6,6 +6,7 @@ require (
 	github.com/Shopify/sarama v1.27.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/felixge/httpsnoop v1.0.1
+	github.com/go-playground/assert/v2 v2.0.1
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
 	github.com/go-playground/validator/v10 v10.4.1

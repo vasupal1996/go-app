@@ -3,6 +3,7 @@ package api
 // InitRoutes initializes all the endpoints
 func (a *API) InitRoutes() {
 	a.Router.Root.Handle("/", a.requestHandler(a.home)).Methods("GET")
+	a.Router.Root.Handle("/", a.requestHandler(a.saveHello)).Methods("POST")
 }
 
 // InitTestRoutes := intializing all the testing and development endpoints

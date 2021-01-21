@@ -2,6 +2,7 @@ package mongostorage
 
 import (
 	"context"
+	"fmt"
 	"go-app/server/config"
 	"log"
 	"os"
@@ -19,6 +20,7 @@ type MongoStorage struct {
 // NewMongoStorage returns new mongodb storage instance
 func NewMongoStorage(c *config.DatabaseConfig) *MongoStorage {
 	clientOpts := options.Client().ApplyURI(c.ConnectionURL())
+	fmt.Println(c.ConnectionURL())
 	client, err := mongo.NewClient(clientOpts)
 	if err != nil {
 		log.Fatalf("failed to establish connection with mongodb: %s", err)

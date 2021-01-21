@@ -1,6 +1,7 @@
 package api
 
 import (
+	"go-app/app"
 	"go-app/server/auth"
 	"go-app/server/config"
 	"go-app/server/handler"
@@ -19,6 +20,8 @@ type API struct {
 	Config     *config.APIConfig
 	TokenAuth  auth.TokenAuth
 	Validator  *validator.Validator
+
+	App *app.App
 }
 
 // Router stores all the endpoints available for the server to respond.

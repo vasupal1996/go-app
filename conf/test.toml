@@ -55,4 +55,9 @@ password=""
 username=""
 
 [middleware]
-enableRequestLog=true
+enableRequestLog=false
+
+[app]
+
+    [app.example]
+    dbName = "test_example"

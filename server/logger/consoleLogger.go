@@ -16,7 +16,7 @@ func NewStandardConsoleWriter() ConsoleWriter {
 	return cw
 }
 
-// NewZeroLogConsoleLogger returns new instance zerolog console logger
-func NewZeroLogConsoleLogger(cw io.Writer) io.Writer {
+// NewZeroLogConsoleWriter returns new instance zerolog console logger
+func NewZeroLogConsoleWriter(cw io.Writer) io.Writer {
 	return zerolog.ConsoleWriter{Out: cw}
 }

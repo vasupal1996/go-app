@@ -41,7 +41,10 @@ func newContextWithRequestID(ctx context.Context, req *http.Request) context.Con
 
 // RequestIDFromContext returns the request id from request context
 func RequestIDFromContext(ctx context.Context) string {
-	return ctx.Value(requestIDKey).(string)
+	if ctx.Value(requestIDKey) != nil {
+		return ctx.Value(requestIDKey).(string)
+	}
+	return ""
 }
 
 // GetMiddlewareHandler function returns middleware used to log requests

@@ -3,6 +3,7 @@ package kafka
 import (
 	"go-app/server/config"
 	"log"
+	"os"
 
 	"github.com/Shopify/sarama"
 )
@@ -21,6 +22,7 @@ func NewSaramaKafka(c *config.KafkaConfig) *SaramaKafkaImpl {
 	sarama, err := sarama.NewClient(c.Brokers, saramaConfig)
 	if err != nil {
 		log.Printf("failed to create sarama client instance: %s", err)
+		os.Exit(1)
 	}
 	return &SaramaKafkaImpl{Config: c, Conn: sarama}
 }
