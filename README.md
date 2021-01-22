@@ -229,3 +229,18 @@ An example of how table driven struct should be defined
 			}
 		})
 	}
+
+
+---
+## Generate service mock
+
+`//go:generate $GOPATH/bin/mockgen -destination=../mock/mock_example.go -package=mock go-app/app Example`
+
+Modify the line above accordingly and at the top of the file where service interface is defined.
+
+---
+## Run and Build
+
+***to run the project*** -->    `go run main.go`
+
+***to build project*** --->     `go build main.go`

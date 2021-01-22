@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"go-app/api"
 	"go-app/app"
+	"go-app/server/auth"
 	"go-app/server/config"
 	goKafka "go-app/server/kafka"
 	"go-app/server/logger"
@@ -22,6 +23,7 @@ import (
 	memorystorage "go-app/server/storage/memory"
 	mongostorage "go-app/server/storage/mongodb"
 	redisstorage "go-app/server/storage/redis"
+	"go-app/server/validator"
 	"io"
 	"net/http"
 	"os"
@@ -51,14 +53,11 @@ func NewServer() *Server {
 	ms := mongostorage.NewMongoStorage(&c.DatabaseConfig)
 	r := mux.NewRouter()
 
-	api := api.NewAPI(r, &c.APIConfig, &c.TokenAuthConfig, nil)
-
 	server := &Server{
 		httpServer: &http.Server{},
 		Config:     c,
 		MongoDB:    ms,
 		Router:     r,
-		API:        api,
 	}
 
 	server.InitLoggers()
@@ -71,6 +70,15 @@ func NewServer() *Server {
 	} else {
 		server.Redis = redisstorage.NewRedisStorage(&c.RedisConfig)
 	}
+
+	// Initializing api endpoints and controller
+	server.API = api.NewAPI(&api.Options{
+		MainRouter: r,
+		Logger:     server.Log,
+		Config:     &c.APIConfig,
+		TokenAuth:  auth.NewTokenAuthentication(&c.TokenAuthConfig),
+		Validator:  validator.NewValidation(),
+	})
 
 	// Initializing app and services
 	server.API.App = app.NewApp(&app.Options{MongoDB: ms, Logger: server.Log, Config: &c.APPConfig})

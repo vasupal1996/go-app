@@ -24,6 +24,16 @@ type API struct {
 	App *app.App
 }
 
+// Options contain all the dependencies required to create a new instance of api
+// and is passed in NewAPI func as argument
+type Options struct {
+	MainRouter *mux.Router
+	Logger     *zerolog.Logger
+	Config     *config.APIConfig
+	TokenAuth  auth.TokenAuth
+	Validator  *validator.Validator
+}
+
 // Router stores all the endpoints available for the server to respond.
 type Router struct {
 	Root       *mux.Router
@@ -32,16 +42,14 @@ type Router struct {
 }
 
 // NewAPI returns API instance
-func NewAPI(m *mux.Router, c *config.APIConfig, tc *config.TokenAuthConfig, l *zerolog.Logger) *API {
-	ta := auth.NewTokenAuthentication(tc)
-	v := validator.NewValidation()
+func NewAPI(opts *Options) *API {
 	api := API{
-		MainRouter: m,
+		MainRouter: opts.MainRouter,
 		Router:     &Router{},
-		Config:     c,
-		TokenAuth:  ta,
-		Logger:     l,
-		Validator:  v,
+		Config:     opts.Config,
+		TokenAuth:  opts.TokenAuth,
+		Logger:     opts.Logger,
+		Validator:  opts.Validator,
 	}
 	api.setupRoutes()
 	return &api
