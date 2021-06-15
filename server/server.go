@@ -61,9 +61,6 @@ func NewServer() *Server {
 	}
 
 	server.InitLoggers()
-	if c.KafkaConfig.EnableKafka {
-		server.InitKafka()
-	}
 
 	if c.ServerConfig.UseMemoryStore {
 		server.Redis = memorystorage.NewMemoryStorage()
@@ -137,8 +134,8 @@ func (s *Server) InitLoggers() {
 	var kl *logger.KafkaLogWriter
 	var cw, fw io.Writer
 	if s.Config.LoggerConfig.EnableKafkaLogger {
-		conn := goKafka.NewSegmentioKafka(&s.Config.KafkaConfig)
-		kl = logger.NewKafkaLogWriter(s.Config.LoggerConfig.KafkaLoggerConfig.KafkaTopic, conn)
+		dialer := goKafka.NewSegmentioKafkaDialer(&s.Config.KafkaConfig)
+		kl = logger.NewKafkaLogWriter(s.Config.LoggerConfig.KafkaLoggerConfig.KafkaTopic, dialer, &s.Config.KafkaConfig)
 	}
 	if s.Config.LoggerConfig.EnableFileLogger {
 		fw = logger.NewFileWriter(s.Config.LoggerConfig.FileLoggerConfig.FileName, s.Config.LoggerConfig.FileLoggerConfig.Path, &s.Config.LoggerConfig.FileLoggerConfig)
@@ -150,12 +147,4 @@ func (s *Server) InitLoggers() {
 
 	// Setting logger
 	s.Log = l
-}
-
-// InitKafka initializes sarama kafka
-func (s *Server) InitKafka() {
-	k := goKafka.NewSaramaKafka(&s.Config.KafkaConfig)
-
-	// Setting up kafka
-	s.Kafka = k
 }

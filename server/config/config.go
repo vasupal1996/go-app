@@ -66,6 +66,26 @@ type KafkaConfig struct {
 	BrokerURL   string   `mapstructure:"brokerUrl"`
 	BrokerPort  string   `mapstructure:"brokerPort"`
 	Brokers     []string `mapstructure:"brokers"`
+	Username    string   `mapstructure:"username"`
+	Password    string   `mapstructure:"password"`
+}
+
+// ListenerConfig contains app kafka topic listener related config
+type ListenerConfig struct {
+	GroupID  string   `mapstructure:"groupId"`
+	Brokers  []string `mapstructure:"brokers"`
+	Topic    string   `mapstructure:"topic"`
+	Username string   `mapstructure:"username"`
+	Password string   `mapstructure:"password"`
+}
+
+// ProducerConfig contains app kafka topic producer related config
+type ProducerConfig struct {
+	Brokers  []string `mapstructure:"brokers"`
+	Topic    string   `mapstructure:"topic"`
+	Async    bool     `mapstructure:"async"`
+	Username string   `mapstructure:"username"`
+	Password string   `mapstructure:"password"`
 }
 
 // LoggerConfig contains different logger configurations

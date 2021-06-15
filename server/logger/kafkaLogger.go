@@ -2,10 +2,9 @@ package logger
 
 import (
 	"context"
+	"go-app/server/config"
 	"io"
 	"log"
-
-	gokafka "go-app/server/kafka"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
@@ -18,13 +17,14 @@ type KafkaLogWriter struct {
 }
 
 // NewKafkaLogWriter returns new instance of KafkaLogWriter
-func NewKafkaLogWriter(topic string, k *gokafka.SegmentioKafkaImpl) *KafkaLogWriter {
-	kw := &kafka.Writer{
-		Addr:     k.Conn.RemoteAddr(),
+func NewKafkaLogWriter(topic string, dialer *kafka.Dialer, c *config.KafkaConfig) *KafkaLogWriter {
+	kw := kafka.NewWriter(kafka.WriterConfig{
+		Brokers:  c.Brokers,
 		Topic:    topic,
 		Async:    true,
 		Balancer: &kafka.LeastBytes{},
-	}
+		Dialer:   dialer,
+	})
 	return &KafkaLogWriter{
 		kw,
 	}
