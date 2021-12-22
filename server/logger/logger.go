@@ -28,7 +28,7 @@ func NewLogger(kw *KafkaLogWriter, cw, fw io.Writer) *zerolog.Logger {
 	}
 
 	// Setting up file writer is True.
-	if kw != nil {
+	if fw != nil {
 		wr := diode.NewWriter(fw, 1000, 10*time.Millisecond, func(missed int) {
 			fmt.Printf("Logger Dropped %d messages", missed)
 		})

@@ -72,6 +72,7 @@ type KafkaConfig struct {
 
 // ListenerConfig contains app kafka topic listener related config
 type ListenerConfig struct {
+	ClientID string   `mapstructure:"clientId"`
 	GroupID  string   `mapstructure:"groupId"`
 	Brokers  []string `mapstructure:"brokers"`
 	Topic    string   `mapstructure:"topic"`
@@ -81,6 +82,7 @@ type ListenerConfig struct {
 
 // ProducerConfig contains app kafka topic producer related config
 type ProducerConfig struct {
+	ClientID string   `mapstructure:"clientId"`
 	Brokers  []string `mapstructure:"brokers"`
 	Topic    string   `mapstructure:"topic"`
 	Async    bool     `mapstructure:"async"`
@@ -136,7 +138,7 @@ func (d *DatabaseConfig) ConnectionURL() string {
 	}
 	url += fmt.Sprintf("%s", d.Host)
 	if d.ReplicaSet != "" {
-		url += fmt.Sprintf("?replicaSet=%s", d.ReplicaSet)
+		url += fmt.Sprintf("/?replicaSet=%s", d.ReplicaSet)
 	}
 	return url
 }

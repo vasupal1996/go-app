@@ -127,3 +127,7 @@ func (m *MemoryStore) Delete(token string) error {
 
 	return nil
 }
+
+func (m *MemoryStore) Do(commandName string, args ...interface{}) (reply interface{}, err error) {
+	return reply, nil
+}

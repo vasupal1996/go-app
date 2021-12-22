@@ -1,9 +1,9 @@
 package redisstorage
 
 import (
+	"fmt"
 	"go-app/server/config"
-	"log"
-	"os"
+	"time"
 
 	"github.com/gomodule/redigo/redis"
 )
@@ -21,18 +21,37 @@ func (rs *RedisStorage) Close() {
 
 // NewRedisStorage returns new redis instance
 func NewRedisStorage(c *config.RedisConfig) *RedisStorage {
-	conn, err := redis.Dial(c.Network, c.ConnectionURL())
-	if err != nil {
-		log.Fatalf("failed to connect to redis: %s", err)
-		os.Exit(1)
+	var client *redis.Pool
+	client = &redis.Pool{
+		MaxActive: 50,
+		// Maximum number of idle connections in the pool.
+		MaxIdle: 25,
+		// max number of connections
+		Dial: func() (redis.Conn, error) {
+			redisConnStart := time.Now()
+			fmt.Println(c.ConnectionURL())
+			c, err := redis.Dial("tcp", c.ConnectionURL())
+			redisConnDuration := time.Since(redisConnStart)
+			fmt.Println("redis connection latency = s%", redisConnDuration)
+			if err != nil {
+				return nil, err
+			}
+			return c, err
+
+		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			if time.Since(t) < time.Minute {
+				return nil
+			}
+			_, err := c.Do("PING")
+			return err
+		},
 	}
-	if _, err := conn.Do("PING"); err != nil {
-		log.Fatalf("failed to ping redis: %s", err)
-		os.Exit(1)
-	}
-	r := &RedisStorage{
-		Config: c,
-		Conn:   conn,
-	}
-	return r
+	conn := client.Get()
+	return &RedisStorage{Conn: conn}
+}
+
+// Close closes redis connection
+func (rs *RedisStorage) Do(commandName string, args ...interface{}) (reply interface{}, err error) {
+	return rs.Conn.Do(commandName, args...)
 }
